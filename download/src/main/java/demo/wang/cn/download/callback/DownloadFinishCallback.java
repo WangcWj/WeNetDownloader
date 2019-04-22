@@ -8,5 +8,5 @@ package demo.wang.cn.download.callback;
  */
 public interface DownloadFinishCallback extends BaseCallback {
 
-    void downloanFinish();
+    void downloanFinish(byte[] bytes);
 }

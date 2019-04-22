@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/DownloanManger.iml" filepath="$PROJECT_DIR$/DownloanManger.iml" />
+      <module fileurl="file://$PROJECT_DIR$/WeLoader.iml" filepath="$PROJECT_DIR$/WeLoader.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/download/download.iml" filepath="$PROJECT_DIR$/download/download.iml" />
     </modules>

@@ -20,12 +20,13 @@ import okhttp3.Request;
  * @author WANG
  * @date 2019/4/15
  */
-public class WeLoader {
+public class WeLoader implements WeLifeCircle {
 
     private OkHttpClient okHttpClient;
     private WeLoaderRequest mWeRequest;
     private WeLoaderResponse mWeLoaderResponse;
     private Call mOkCall;
+    private boolean isDestroy = false;
 
 
     public WeLoader(Builder builder) {
@@ -58,6 +59,22 @@ public class WeLoader {
         mOkCall = okHttpClient.newCall(request);
         mOkCall.enqueue(mWeLoaderResponse);
         mWeLoaderResponse.noticeStartListener();
+    }
+
+    @Override
+    public void create() {
+        //还没想到这个方法可以用来弄啥
+        isDestroy = false;
+    }
+
+    @Override
+    public void destroy(){
+        isDestroy = true;
+        mWeLoaderResponse.destroy();
+        mWeRequest.destroy();
+        cancel();
+        okHttpClient = null;
+        mOkCall = null;
     }
 
     public static class Builder {

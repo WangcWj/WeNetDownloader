@@ -1,6 +1,7 @@
 package demo.wang.cn.download.request;
 import java.io.File;
 
+import demo.wang.cn.download.WeLifeCircle;
 import okhttp3.Request;
 
 /**
@@ -9,7 +10,7 @@ import okhttp3.Request;
  * @author WANG
  * @date 2019/4/15
  */
-public class WeLoaderRequest {
+public class WeLoaderRequest implements WeLifeCircle {
 
     final String TAG = "WeLoaderRequest : ";
     private String url;
@@ -50,5 +51,15 @@ public class WeLoaderRequest {
         if (mTargetFile.exists()) {
             mTargetFile.delete();
         }
+    }
+
+    @Override
+    public void create() {
+        //
+    }
+
+    @Override
+    public void destroy() {
+        mTargetFile = null;
     }
 }

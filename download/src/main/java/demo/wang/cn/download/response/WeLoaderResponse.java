@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import demo.wang.cn.download.WeLifeCircle;
 import demo.wang.cn.download.callback.BaseCallback;
 import demo.wang.cn.download.callback.DownloadCancelCallback;
 import demo.wang.cn.download.callback.DownloadFailCallback;
@@ -22,10 +23,11 @@ import okhttp3.Response;
  * @author WANG
  * @date 2019/4/19
  */
-public class WeLoaderResponse implements Callback, ProgressListener {
+public class WeLoaderResponse implements Callback, ProgressListener, WeLifeCircle {
 
     private volatile long mCurrentPoint = 0L;
     private Map<String, BaseCallback> callbacks = new HashMap<>();
+    private boolean isDestroy;
 
 
     public long getBreakPoint() {
@@ -39,14 +41,67 @@ public class WeLoaderResponse implements Callback, ProgressListener {
         }
     }
 
-    @Override
-    public void onFailure(Call call, IOException e) {
+    public void noticeCancelListener() {
+        DownloadCancelCallback callback = getCallback(DownloadCancelCallback.class);
+        if (!checkNull(callback)) {
+            callback.downloanCancel();
+        }
+    }
+
+    public void noticeStartListener() {
+        DownloadStartCallback callback = getCallback(DownloadStartCallback.class);
+        if (!checkNull(callback)) {
+            callback.downloanStart();
+        }
+    }
+
+    private void noticeFinishListener(byte[] bytes) {
+        DownloadFinishCallback callback = getCallback(DownloadFinishCallback.class);
+        if (!checkNull(callback)) {
+            callback.downloanFinish(bytes);
+        }
+    }
+
+    private void noticeFailListener(Exception e) {
+        DownloadFailCallback callback = getCallback(DownloadFailCallback.class);
+        if (!checkNull(callback)) {
+            callback.downloanFail(e);
+        }
+    }
+
+    private void noticeProgressListener(long count, long read) {
+        DownloadProgressCallback callback = getCallback(DownloadProgressCallback.class);
+        if (!checkNull(callback)) {
+            callback.downLoanProgress(count, read, 0);
+        }
+    }
+
+    private <T> T getCallback(Class<T> clz) {
+        String name = clz.getName();
+        T baseCallback = (T) callbacks.get(name);
+        return baseCallback;
+    }
+
+    private boolean checkNull(BaseCallback baseCallback) {
+        if (null == baseCallback || isDestroy) {
+            return true;
+        }
+        return false;
     }
 
     @Override
-    public void onResponse(Call call, Response response) throws IOException {
-        long legth = response.body().bytes().length;
+    public void onFailure(Call call, IOException e) {
+        noticeFailListener(e);
+    }
 
+    @Override
+    public void onResponse(Call call, Response response) {
+        try {
+            byte[] bytes = response.body().bytes();
+            noticeFinishListener(bytes);
+        } catch (Exception e) {
+            noticeFailListener(e);
+        }
     }
 
     @Override
@@ -55,45 +110,15 @@ public class WeLoaderResponse implements Callback, ProgressListener {
         noticeProgressListener(count, read);
     }
 
-    public void noticeCancelListener() {
-        BaseCallback callback = getCallbackKey(DownloadCancelCallback.class);
-        if (callback instanceof DownloadCancelCallback) {
-            ((DownloadCancelCallback) callback).downloanCancel();
-        }
+
+    @Override
+    public void create() {
+        isDestroy = false;
     }
 
-    public void noticeStartListener() {
-        BaseCallback callback = getCallbackKey(DownloadStartCallback.class);
-        if (callback instanceof DownloadStartCallback) {
-            ((DownloadCancelCallback) callback).downloanCancel();
-        }
-    }
-
-    private void noticeFinishListener() {
-        BaseCallback callback = getCallbackKey(DownloadStartCallback.class);
-        if (callback instanceof DownloadFinishCallback) {
-            ((DownloadCancelCallback) callback).downloanCancel();
-        }
-    }
-
-    private void noticeFailListener(Exception e) {
-        BaseCallback callback = getCallbackKey(DownloadFailCallback.class);
-        if (callback instanceof DownloadFailCallback) {
-            ((DownloadFailCallback) callback).downloanFail(e);
-        }
-    }
-
-    private void noticeProgressListener(long count, long read) {
-        BaseCallback callback = getCallbackKey(DownloadProgressCallback.class);
-        if (callback instanceof DownloadProgressCallback) {
-            float prcent = (float) read / count;
-            ((DownloadProgressCallback) callback).downLoanProgress(read, count, prcent);
-        }
-    }
-
-    private BaseCallback getCallbackKey(Class clz) {
-        String name = clz.getName();
-        BaseCallback baseCallback = callbacks.get(name);
-        return baseCallback;
+    @Override
+    public void destroy() {
+        isDestroy = true;
+        callbacks.clear();
     }
 }
