@@ -6,7 +6,7 @@ package demo.wang.cn.download.callback;
  * @author WANG
  * @date 2019/4/15
  */
-public interface ProgressListener {
+public interface WeLoaderProgressListener extends WeloaderBaseCallback{
 
     void progress(long count, long read, boolean isFinish);
 

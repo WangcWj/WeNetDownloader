@@ -1,7 +1,8 @@
 package demo.wang.cn.download.request;
 import java.io.File;
 
-import demo.wang.cn.download.WeLifeCircle;
+import demo.wang.cn.download.lifecircle.WeLoaderLifeCircle;
+import demo.wang.cn.download.utils.FileUtils;
 import okhttp3.Request;
 
 /**
@@ -10,7 +11,7 @@ import okhttp3.Request;
  * @author WANG
  * @date 2019/4/15
  */
-public class WeLoaderRequest implements WeLifeCircle {
+public class WeLoaderRequest implements WeLoaderLifeCircle {
 
     final String TAG = "WeLoaderRequest : ";
     private String url;
@@ -28,17 +29,6 @@ public class WeLoaderRequest implements WeLifeCircle {
         return mTargetFile;
     }
 
-    public WeLoaderRequest setFilePath(String mFilePath) {
-        mTargetFile = new File(mFilePath);
-        checkoutFile();
-        return this;
-    }
-
-    public void setTargetFile(File mTargetFile) {
-        this.mTargetFile = mTargetFile;
-        checkoutFile();
-    }
-
     public Request createRequest(long startPoints) {
         Request request = new Request.Builder()
                 .addHeader("RANGE", "bytes=" + startPoints + "-")
@@ -47,10 +37,22 @@ public class WeLoaderRequest implements WeLifeCircle {
         return request;
     }
 
-    private void checkoutFile() {
-        if (mTargetFile.exists()) {
-            mTargetFile.delete();
+    public WeLoaderRequest setFilePath(String mFilePath) {
+        File file = FileUtils.handleFile(mFilePath);
+        checkFile(file);
+        return this;
+    }
+
+    public void setTargetFile(File mTargetFile) {
+        FileUtils.handleFile(mTargetFile);
+        checkFile(mTargetFile);
+    }
+
+    private void checkFile(File file){
+        if(null == file){
+            throw new RuntimeException();
         }
+        mTargetFile = file;
     }
 
     @Override

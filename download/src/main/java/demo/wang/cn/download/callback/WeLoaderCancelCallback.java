@@ -6,7 +6,7 @@ package demo.wang.cn.download.callback;
  * @author WANG
  * @date 2019/4/22
  */
-public interface DownloadFinishCallback extends BaseCallback {
+public interface WeLoaderCancelCallback extends WeloaderBaseCallback {
 
-    void downloanFinish(byte[] bytes);
+    void downLoanCancel();
 }

@@ -1,18 +1,20 @@
 package demo.wang.cn.download;
 
-
-import android.util.Log;
-
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
+import demo.wang.cn.download.callback.InnerFinishCallBack;
 import demo.wang.cn.download.callback.BaseCallback;
-import demo.wang.cn.download.intercepter.IntercepterFactory;
+import demo.wang.cn.download.callback.WeLoaderCancelCallback;
+import demo.wang.cn.download.callback.WeLoaderStartCallback;
+import demo.wang.cn.download.intercepter.WeLoaderInterceptorFactory;
+import demo.wang.cn.download.lifecircle.WeLoaderLifeCircle;
 import demo.wang.cn.download.request.WeLoaderRequest;
 import demo.wang.cn.download.response.WeLoaderResponse;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Created to :
@@ -20,7 +22,7 @@ import okhttp3.Request;
  * @author WANG
  * @date 2019/4/15
  */
-public class WeLoader implements WeLifeCircle {
+public class WeLoader implements WeLoaderLifeCircle, InnerFinishCallBack {
 
     private OkHttpClient okHttpClient;
     private WeLoaderRequest mWeRequest;
@@ -33,6 +35,7 @@ public class WeLoader implements WeLifeCircle {
         okHttpClient = builder.okHttpClient;
         mWeRequest = builder.weRequest;
         mWeLoaderResponse = builder.weLoaderResponse;
+        mWeLoaderResponse.setBaseCallback(this);
     }
 
     public void execute() {
@@ -50,7 +53,7 @@ public class WeLoader implements WeLifeCircle {
     private void cancel() {
         if (null != mOkCall && !mOkCall.isCanceled() && !mOkCall.isExecuted()) {
             mOkCall.cancel();
-            mWeLoaderResponse.noticeCancelListener();
+            mWeLoaderResponse.runMainThread(WeLoaderCancelCallback.class);
         }
     }
 
@@ -58,7 +61,17 @@ public class WeLoader implements WeLifeCircle {
         Request request = mWeRequest.createRequest(startPoint);
         mOkCall = okHttpClient.newCall(request);
         mOkCall.enqueue(mWeLoaderResponse);
-        mWeLoaderResponse.noticeStartListener();
+        mWeLoaderResponse.runMainThread(WeLoaderStartCallback.class);
+    }
+
+    /**
+     * 运行环境: 子线程运行.
+     * @param response
+     */
+    @Override
+    public void downLoanFinish(Response response) {
+        File targetFile = mWeRequest.getTargetFile();
+        mWeLoaderResponse.saveFile(mWeLoaderResponse.getBreakPoint(),targetFile,response);
     }
 
     @Override
@@ -68,7 +81,7 @@ public class WeLoader implements WeLifeCircle {
     }
 
     @Override
-    public void destroy(){
+    public void destroy() {
         isDestroy = true;
         mWeLoaderResponse.destroy();
         mWeRequest.destroy();
@@ -90,7 +103,7 @@ public class WeLoader implements WeLifeCircle {
                     .readTimeout(3, TimeUnit.MINUTES)
                     .writeTimeout(3, TimeUnit.MINUTES)
                     .connectTimeout(3, TimeUnit.MINUTES)
-                    .addNetworkInterceptor(IntercepterFactory.createProgressIntercepter(weLoaderResponse));
+                    .addNetworkInterceptor(WeLoaderInterceptorFactory.createProgressInterceptor(weLoaderResponse));
         }
 
         public Builder url(String url) {

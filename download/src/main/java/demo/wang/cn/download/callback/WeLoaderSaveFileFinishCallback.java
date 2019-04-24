@@ -6,7 +6,7 @@ package demo.wang.cn.download.callback;
  * @author WANG
  * @date 2019/4/22
  */
-public interface DownloadFailCallback extends BaseCallback {
+public interface WeLoaderSaveFileFinishCallback extends WeloaderBaseCallback{
 
-    void downloanFail(Exception e);
+    void saveFileFinish();
 }

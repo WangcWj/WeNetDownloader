@@ -4,7 +4,7 @@ import android.util.Log;
 
 import java.io.IOException;
 
-import demo.wang.cn.download.callback.ProgressListener;
+import demo.wang.cn.download.callback.WeLoaderProgressListener;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import okio.Buffer;
@@ -19,14 +19,14 @@ import okio.Source;
  * @author WANG
  * @date 2019/4/15
  */
-public class DownloadProgressResponseBody extends ResponseBody {
+public class WeLoaderProgressResponseBody extends ResponseBody {
     private ResponseBody responseBody;
-    private ProgressListener progressListener;
+    private WeLoaderProgressListener weLoaderProgressListener;
     private BufferedSource bufferedSource;
 
-    public DownloadProgressResponseBody(ResponseBody responseBody, ProgressListener progressListener) {
+    public WeLoaderProgressResponseBody(ResponseBody responseBody, WeLoaderProgressListener weLoaderProgressListener) {
         this.responseBody = responseBody;
-        this.progressListener = progressListener;
+        this.weLoaderProgressListener = weLoaderProgressListener;
     }
 
     @Override
@@ -55,8 +55,8 @@ public class DownloadProgressResponseBody extends ResponseBody {
             public long read(Buffer sink, long byteCount) throws IOException {
                 long read = super.read(sink, byteCount);
                 currentRead += read != -1 ? read : 0;
-                if (null != progressListener) {
-                    progressListener.progress(responseBody.contentLength(), currentRead, read == -1);
+                if (null != weLoaderProgressListener) {
+                    weLoaderProgressListener.progress(responseBody.contentLength(), currentRead, read == -1);
                 }
                 return read;
             }

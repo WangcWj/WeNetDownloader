@@ -6,7 +6,7 @@ package demo.wang.cn.download.callback;
  * @author WANG
  * @date 2019/4/22
  */
-public interface DownloadProgressCallback extends BaseCallback {
+public interface WeLoaderProgressCallback extends WeloaderBaseCallback{
 
     void downLoanProgress(long read, long count, float percentage);
 }

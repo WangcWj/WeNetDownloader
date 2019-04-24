@@ -13,4 +13,12 @@
         android:layout_height="wrap_content"
         android:text="下载" />
 
+    <TextView
+        android:textSize="20dp"
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/colorAccent" />
+
 </LinearLayout>
