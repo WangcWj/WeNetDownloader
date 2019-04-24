@@ -8,7 +8,7 @@ import okhttp3.Response;
  * @author WANG
  * @date 2019/4/22
  */
-public interface InnerFinishCallBack extends BaseCallback {
+public interface InnerFinishCallBack extends WeloaderBaseCallback {
 
     void downLoanFinish(Response response);
 }

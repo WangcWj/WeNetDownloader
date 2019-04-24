@@ -121,8 +121,8 @@ public class WeLoader implements WeLoaderLifeCircle, InnerFinishCallBack {
             return this;
         }
 
-        public Builder addListener(BaseCallback baseCallback) {
-            weLoaderResponse.setBaseCallback(baseCallback);
+        public Builder addAllListener(BaseCallback baseCallback) {
+            weLoaderResponse.setAllCallback(baseCallback);
             return this;
         }
 

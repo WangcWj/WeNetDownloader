@@ -14,10 +14,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import demo.wang.cn.download.WeLoader;
+import demo.wang.cn.download.callback.BaseCallback;
 import demo.wang.cn.download.callback.WeLoaderFinishCallback;
 import demo.wang.cn.download.callback.WeLoaderProgressCallback;
+import demo.wang.cn.download.callback.WeloaderBaseCallback;
 
-public class MainActivity extends AppCompatActivity implements WeLoaderProgressCallback , WeLoaderFinishCallback {
+public class MainActivity extends AppCompatActivity implements BaseCallback {
 
     private String downloan = "https://alissl.ucdl.pp.uc.cn/fs01/union_pack/Wandoujia_844461_web_seo_baidu_homepage.apk";
 
@@ -48,8 +50,7 @@ public class MainActivity extends AppCompatActivity implements WeLoaderProgressC
                 WeLoader build = new WeLoader.Builder()
                         .url(downloan)
                         .file(filePath)
-                        .addListener(MainActivity.this)
-                        .addListener(MainActivity.this)
+                        .addAllListener(MainActivity.this)
                         .build();
               //  build.execute();
 
