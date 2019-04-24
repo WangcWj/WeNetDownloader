@@ -53,15 +53,15 @@ public class WeLoader implements WeLoaderLifeCircle, InnerFinishCallBack {
     private void cancel() {
         if (null != mOkCall && !mOkCall.isCanceled() && !mOkCall.isExecuted()) {
             mOkCall.cancel();
-            mWeLoaderResponse.runMainThread(WeLoaderCancelCallback.class);
+            mWeLoaderResponse.runMainThread(BaseCallback.CANCEL_INS);
         }
     }
 
     private void request(long startPoint) {
         Request request = mWeRequest.createRequest(startPoint);
         mOkCall = okHttpClient.newCall(request);
+        mWeLoaderResponse.setStart(true);
         mOkCall.enqueue(mWeLoaderResponse);
-        mWeLoaderResponse.runMainThread(WeLoaderStartCallback.class);
     }
 
     /**

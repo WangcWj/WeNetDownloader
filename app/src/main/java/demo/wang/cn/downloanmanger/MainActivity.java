@@ -14,12 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import demo.wang.cn.download.WeLoader;
-import demo.wang.cn.download.callback.BaseCallback;
-import demo.wang.cn.download.callback.WeLoaderFinishCallback;
-import demo.wang.cn.download.callback.WeLoaderProgressCallback;
-import demo.wang.cn.download.callback.WeloaderBaseCallback;
 
-public class MainActivity extends AppCompatActivity implements BaseCallback {
+public class MainActivity extends AppCompatActivity {
 
     private String downloan = "https://alissl.ucdl.pp.uc.cn/fs01/union_pack/Wandoujia_844461_web_seo_baidu_homepage.apk";
 
@@ -50,21 +46,13 @@ public class MainActivity extends AppCompatActivity implements BaseCallback {
                 WeLoader build = new WeLoader.Builder()
                         .url(downloan)
                         .file(filePath)
-                        .addAllListener(MainActivity.this)
                         .build();
-              //  build.execute();
+                build.execute();
 
             }
         });
     }
 
-    @Override
-    public void downLoanProgress(long read, long count, float percentage) {
-        textView.setText("count= "+ count+", read ="+read);
-    }
 
-    @Override
-    public void downLoanFinish() {
-        Log.e("WANG","MainActivity.downLoanFinish." );
-    }
+
 }

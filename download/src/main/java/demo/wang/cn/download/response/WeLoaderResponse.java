@@ -36,46 +36,50 @@ import okhttp3.ResponseBody;
 public class WeLoaderResponse implements Callback, WeLoaderProgressListener, WeLoaderLifeCircle, Runnable {
 
     private volatile long mCurrentPoint = 0L;
-    private Map<String, WeloaderBaseCallback> callbacks ;
-    private BaseCallback baseCallback;
+    private Map<String, WeloaderBaseCallback> callbacks;
     private boolean isDestroy;
-
+    private volatile boolean isStart = false;
 
     public long getBreakPoint() {
         return mCurrentPoint;
     }
 
-    public void setAllCallback(BaseCallback baseCallback) {
-        this.baseCallback = baseCallback;
+    public void setStart(boolean start) {
+        isStart = start;
     }
 
+    /**
+     * 。。。
+     *
+     * @param mBaseCallback
+     */
     public void setBaseCallback(WeloaderBaseCallback mBaseCallback) {
-        if(callbacks == null){
-            callbacks = new HashMap<>();
+        if (callbacks == null) {
+            callbacks = new HashMap<>(7);
         }
-        Class aClass = CallBackUtils.switchCallBack(mBaseCallback);
-        if (null == aClass) {
+        String flag = CallBackUtils.switchCallBack(mBaseCallback);
+        if (null == flag) {
             return;
         }
-        String name = aClass.getName();
-        if (!callbacks.containsKey(name)) {
-            callbacks.put(name, mBaseCallback);
+        if (!callbacks.containsKey(flag)) {
+            callbacks.put(flag, mBaseCallback);
         }
     }
-
 
     /**
      * 运行环境: 子线程运行
+     *
      * @param call
      * @param e
      */
     @Override
     public void onFailure(Call call, IOException e) {
-       runMainThread(WeLoaderFailCallback.class,e);
+        runMainThread(BaseCallback.FAIL_INS, e);
     }
 
     /**
      * 运行环境: 子线程运行
+     *
      * @param call
      * @param response
      */
@@ -85,49 +89,59 @@ public class WeLoaderResponse implements Callback, WeLoaderProgressListener, WeL
             //子线程
             notifyManagerFinishListener(response);
         } catch (Exception e) {
-            runMainThread(WeLoaderFailCallback.class,e);
+            runMainThread(BaseCallback.FAIL_INS, e);
         }
     }
 
     /**
      * 运行环境: 子线程运行
+     *
      * @param count
      * @param read
      * @param isFinish
      */
     @Override
     public void progress(long count, long read, boolean isFinish) {
-        if(isFinish){
+        if (isFinish) {
+            isStart = false;
             //切线程
-            runMainThread(WeLoaderFinishCallback.class);
+            runMainThread(BaseCallback.DOWNLOAN_FINISH_INS);
             return;
         }
+        if (isStart) {
+            isStart = false;
+            runMainThread(BaseCallback.START_INS);
+        }
         mCurrentPoint = read;
-        runMainThread(WeLoaderProgressCallback.class, count, read);
+        runMainThread(BaseCallback.PROGRESS_INS, count, read);
     }
 
     /**
      * 运行环境: 子线程运行
+     *
      * @param response
      */
     private void notifyManagerFinishListener(Response response) {
-        getCallback(InnerFinishCallBack.class,response);
+        notifyCallBack(BaseCallback.INNER_FINISH_INS, response);
     }
 
-    public void runMainThread(Class clz, Object... arg) {
+    public void runMainThread(String flag, Object... arg) {
         ThreadUtils.runThread(false, new Runnable() {
             @Override
             public void run() {
-                getCallback(clz,arg);
+                notifyCallBack(flag, arg);
             }
         });
     }
 
-    private void getCallback(Class clz, Object... arg) {
-        String name = clz.getName();
-        WeloaderBaseCallback weLoaderBaseCallback = callbacks.get(name);
+    private void notifyCallBack(String flag, Object... arg) {
+        WeloaderBaseCallback weLoaderBaseCallback = callbacks.get(flag);
         if (!checkNull(weLoaderBaseCallback)) {
-            CallBackUtils.notifyCallBack(weLoaderBaseCallback, arg);
+            CallBackUtils.notifyCallBack(weLoaderBaseCallback, flag, arg);
+        }
+        WeloaderBaseCallback allCallback = callbacks.get(BaseCallback.ALL);
+        if (!checkNull(allCallback)) {
+            CallBackUtils.notifyCallBack(allCallback, flag, arg);
         }
     }
 
@@ -157,7 +171,7 @@ public class WeLoaderResponse implements Callback, WeLoaderProgressListener, WeL
             }
         } catch (IOException e) {
             e.printStackTrace();
-            runMainThread(WeLoaderFailCallback.class,e);
+            runMainThread(BaseCallback.FAIL_INS, e);
         } finally {
             try {
                 in.close();

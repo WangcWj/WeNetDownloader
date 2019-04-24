@@ -19,23 +19,49 @@ import okhttp3.Response;
  */
 public class CallBackUtils {
 
-    public static Class switchCallBack(WeloaderBaseCallback baseCallback) {
+    public static String switchCallBack(WeloaderBaseCallback baseCallback) {
         if (baseCallback instanceof WeLoaderProgressCallback) {
-            return WeLoaderProgressCallback.class;
+            return BaseCallback.PROGRESS_INS;
         } else if (baseCallback instanceof WeLoaderStartCallback) {
-            return WeLoaderStartCallback.class;
+            return BaseCallback.START_INS;
         } else if (baseCallback instanceof WeLoaderFinishCallback) {
-            return WeLoaderFinishCallback.class;
+            return BaseCallback.DOWNLOAN_FINISH_INS;
         } else if (baseCallback instanceof WeLoaderFailCallback) {
-            return WeLoaderFailCallback.class;
+            return BaseCallback.FAIL_INS;
         } else if (baseCallback instanceof InnerFinishCallBack) {
-            return InnerFinishCallBack.class;
+            return BaseCallback.INNER_FINISH_INS;
         } else if (baseCallback instanceof WeLoaderCancelCallback) {
-            return WeLoaderCancelCallback.class;
-        } else if (baseCallback instanceof WeLoaderSaveFileFinishCallback) {
-            return WeLoaderSaveFileFinishCallback.class;
+            return BaseCallback.CANCEL_INS;
+        }else if (baseCallback instanceof BaseCallback) {
+            return BaseCallback.ALL;
         }
         return null;
+    }
+
+    public static void notifyCallBack(WeloaderBaseCallback baseCallback,String flag ,Object... arg) {
+       switch (flag){
+           case BaseCallback.PROGRESS_INS:
+               callbackProgress(baseCallback, arg);
+               break;
+           case BaseCallback.START_INS:
+               ((WeLoaderStartCallback) baseCallback).downLoanStart();
+               break;
+           case BaseCallback.DOWNLOAN_FINISH_INS:
+               ((WeLoaderFinishCallback) baseCallback).downLoanFinish();
+               break;
+           case BaseCallback.FAIL_INS:
+               callbackFail(baseCallback, arg);
+               break;
+           case BaseCallback.INNER_FINISH_INS:
+               ((WeLoaderCancelCallback) baseCallback).downLoanCancel();
+               break;
+           case BaseCallback.CANCEL_INS:
+               callbackFinish(baseCallback, arg);
+               break;
+               default:
+                   break;
+
+       }
     }
 
     public static void notifyCallBack(WeloaderBaseCallback baseCallback, Object... arg) {
