@@ -6,22 +6,14 @@ package demo.wang.cn.download.callback;
  * @author WANG
  * @date 2019/4/22
  */
-public abstract class BaseCallback implements WeloaderBaseCallback,
-        WeLoaderCancelCallback,
+public abstract  class BaseCallback implements WeLoaderCancelCallback,
         WeLoaderFailCallback,
         WeLoaderProgressCallback,
-        WeLoaderStartCallback,WeLoaderFinishCallback {
+        WeLoaderStartCallback,WeLoaderFinishCallback,WeloaderBaseCallback {
 
-    public static final String PROGRESS_INS = "downLoanProgress";
-    public static final String FAIL_INS = "downLoanFail";
-    public static final String CANCEL_INS = "downLoanCancel";
-    public static final String START_INS = "downLoanStart";
-    public static final String DOWNLOAN_FINISH_INS = "downLoanFinish";
-    public static final String INNER_FINISH_INS = "innerFinish";
-    public static final String ALL = "all";
 
     @Override
-    public void downLoanProgress(long read, long count, float percentage) {
+    public void downLoanCancel() {
 
     }
 
@@ -31,17 +23,17 @@ public abstract class BaseCallback implements WeloaderBaseCallback,
     }
 
     @Override
-    public void downLoanCancel() {
+    public void downLoanFinish() {
+
+    }
+
+    @Override
+    public void downLoanProgress(long read, long count, float percentage) {
 
     }
 
     @Override
     public void downLoanStart() {
-
-    }
-
-    @Override
-    public void downLoanFinish() {
 
     }
 }

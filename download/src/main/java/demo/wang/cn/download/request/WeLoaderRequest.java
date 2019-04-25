@@ -1,4 +1,5 @@
 package demo.wang.cn.download.request;
+
 import java.io.File;
 
 import demo.wang.cn.download.lifecircle.WeLoaderLifeCircle;
@@ -11,57 +12,51 @@ import okhttp3.Request;
  * @author WANG
  * @date 2019/4/15
  */
-public class WeLoaderRequest implements WeLoaderLifeCircle {
+public interface WeLoaderRequest extends WeLoaderLifeCircle {
 
-    final String TAG = "WeLoaderRequest : ";
-    private String url;
-    private File mTargetFile;
+    /**
+     * 获取当前下载的URl连接
+     *
+     * @return
+     */
+    String getUrl();
 
-    public String getUrl() {
-        return url;
-    }
+    /**
+     * 设置本次任务的下载链接
+     *
+     * @param url
+     */
+    void setUrl(String url);
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
+    /**
+     * 获取下载到本地的文件
+     *
+     * @return
+     */
+    File getTargetFile();
 
-    public File getTargetFile() {
-        return mTargetFile;
-    }
+    /**
+     * 创建一个请求
+     *
+     * @param startPoints 本次请求开始断点
+     * @return OkHttp 的Request对象
+     */
+    Request createRequest(long startPoints);
 
-    public Request createRequest(long startPoints) {
-        Request request = new Request.Builder()
-                .addHeader("RANGE", "bytes=" + startPoints + "-")
-                .url(url)
-                .build();
-        return request;
-    }
+    /**
+     * 本地保存的文件的路径
+     *
+     * @param mFilePath 文件路径H
+     * @return
+     */
+    WeLoaderRequest setFilePath(String mFilePath);
 
-    public WeLoaderRequest setFilePath(String mFilePath) {
-        File file = FileUtils.handleFile(mFilePath);
-        checkFile(file);
-        return this;
-    }
+    /**
+     * 本地保存的文件的路径
+     *
+     * @param mTargetFile File
+     */
+    void setTargetFile(File mTargetFile);
 
-    public void setTargetFile(File mTargetFile) {
-        FileUtils.handleFile(mTargetFile);
-        checkFile(mTargetFile);
-    }
 
-    private void checkFile(File file){
-        if(null == file){
-            throw new RuntimeException();
-        }
-        mTargetFile = file;
-    }
-
-    @Override
-    public void create() {
-        //
-    }
-
-    @Override
-    public void destroy() {
-        mTargetFile = null;
-    }
 }

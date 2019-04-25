@@ -1,16 +1,20 @@
 package demo.wang.cn.download;
 
+import android.util.Log;
+
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import demo.wang.cn.download.callback.InnerFinishCallBack;
-import demo.wang.cn.download.callback.BaseCallback;
-import demo.wang.cn.download.callback.WeLoaderCancelCallback;
-import demo.wang.cn.download.callback.WeLoaderStartCallback;
+import demo.wang.cn.download.callback.WeLoaderProgressListener;
+import demo.wang.cn.download.callback.WeloaderBaseCallback;
+import demo.wang.cn.download.constant.WeLoaderConstant;
 import demo.wang.cn.download.intercepter.WeLoaderInterceptorFactory;
 import demo.wang.cn.download.lifecircle.WeLoaderLifeCircle;
 import demo.wang.cn.download.request.WeLoaderRequest;
+import demo.wang.cn.download.request.WeLoaderRequestImp;
 import demo.wang.cn.download.response.WeLoaderResponse;
+import demo.wang.cn.download.response.WeLoaderResponseImp;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -36,6 +40,7 @@ public class WeLoader implements WeLoaderLifeCircle, InnerFinishCallBack {
         mWeRequest = builder.weRequest;
         mWeLoaderResponse = builder.weLoaderResponse;
         mWeLoaderResponse.setBaseCallback(this);
+        create();
     }
 
     public void execute() {
@@ -51,9 +56,9 @@ public class WeLoader implements WeLoaderLifeCircle, InnerFinishCallBack {
     }
 
     private void cancel() {
-        if (null != mOkCall && !mOkCall.isCanceled() && !mOkCall.isExecuted()) {
+        if (null != mOkCall && !mOkCall.isCanceled()) {
             mOkCall.cancel();
-            mWeLoaderResponse.runMainThread(BaseCallback.CANCEL_INS);
+            mWeLoaderResponse.notifyCallBack(WeLoaderConstant.CANCEL_INS);
         }
     }
 
@@ -66,28 +71,33 @@ public class WeLoader implements WeLoaderLifeCircle, InnerFinishCallBack {
 
     /**
      * 运行环境: 子线程运行.
+     *
      * @param response
      */
     @Override
     public void downLoanFinish(Response response) {
         File targetFile = mWeRequest.getTargetFile();
-        mWeLoaderResponse.saveFile(mWeLoaderResponse.getBreakPoint(),targetFile,response);
+        mWeLoaderResponse.saveFile(mWeLoaderResponse.getBreakPoint(), targetFile, response);
     }
 
     @Override
     public void create() {
         //还没想到这个方法可以用来弄啥
         isDestroy = false;
+        mWeLoaderResponse.create();
+        mWeRequest.create();
     }
 
     @Override
     public void destroy() {
         isDestroy = true;
+        cancel();
         mWeLoaderResponse.destroy();
         mWeRequest.destroy();
-        cancel();
         okHttpClient = null;
         mOkCall = null;
+        mWeRequest = null;
+        mWeLoaderResponse = null;
     }
 
     public static class Builder {
@@ -97,13 +107,13 @@ public class WeLoader implements WeLoaderLifeCircle, InnerFinishCallBack {
         private OkHttpClient okHttpClient;
 
         public Builder() {
-            weRequest = new WeLoaderRequest();
-            weLoaderResponse = new WeLoaderResponse();
+            weRequest = new WeLoaderRequestImp();
+            weLoaderResponse = new WeLoaderResponseImp();
             builder = new OkHttpClient.Builder()
                     .readTimeout(3, TimeUnit.MINUTES)
                     .writeTimeout(3, TimeUnit.MINUTES)
                     .connectTimeout(3, TimeUnit.MINUTES)
-                    .addNetworkInterceptor(WeLoaderInterceptorFactory.createProgressInterceptor(weLoaderResponse));
+                    .addNetworkInterceptor(WeLoaderInterceptorFactory.createProgressInterceptor((WeLoaderProgressListener) weLoaderResponse));
         }
 
         public Builder url(String url) {
@@ -111,8 +121,8 @@ public class WeLoader implements WeLoaderLifeCircle, InnerFinishCallBack {
             return this;
         }
 
-        public Builder file(String filrPath) {
-            weRequest.setFilePath(filrPath);
+        public Builder file(String filePath) {
+            weRequest.setFilePath(filePath);
             return this;
         }
 
@@ -121,8 +131,8 @@ public class WeLoader implements WeLoaderLifeCircle, InnerFinishCallBack {
             return this;
         }
 
-        public Builder addAllListener(BaseCallback baseCallback) {
-            weLoaderResponse.setAllCallback(baseCallback);
+        public Builder addListener(WeloaderBaseCallback baseCallback) {
+            weLoaderResponse.setBaseCallback(baseCallback);
             return this;
         }
 
