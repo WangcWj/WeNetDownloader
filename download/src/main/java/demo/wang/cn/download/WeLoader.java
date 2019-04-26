@@ -1,7 +1,4 @@
 package demo.wang.cn.download;
-
-import android.util.Log;
-
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
@@ -44,6 +41,9 @@ public class WeLoader implements WeLoaderLifeCircle, InnerFinishCallBack {
     }
 
     public void execute() {
+        if(mWeLoaderResponse.isRunning()){
+            return;
+        }
         request(0);
     }
 
@@ -53,6 +53,18 @@ public class WeLoader implements WeLoaderLifeCircle, InnerFinishCallBack {
 
     public void stop() {
         cancel();
+    }
+
+    public String getUrl(){
+        return mWeRequest.getUrl();
+    }
+
+    public File getSaveFile(){
+        return mWeRequest.getTargetFile();
+    }
+
+    public WeLoaderRequest getWeRequest() {
+        return mWeRequest;
     }
 
     private void cancel() {

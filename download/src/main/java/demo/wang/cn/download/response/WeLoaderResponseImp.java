@@ -1,8 +1,5 @@
 package demo.wang.cn.download.response;
 
-
-import android.util.Log;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +30,7 @@ public class WeLoaderResponseImp implements WeLoaderProgressListener,WeLoaderRes
     private Map<String, WeloaderBaseCallback> callbacks;
     private boolean isDestroy;
     private volatile boolean isStart = false;
+    private volatile boolean isRunning = false;
 
     @Override
     public long getBreakPoint() {
@@ -42,6 +40,11 @@ public class WeLoaderResponseImp implements WeLoaderProgressListener,WeLoaderRes
     @Override
     public void setStart(boolean start) {
         isStart = start;
+    }
+
+    @Override
+    public boolean isRunning() {
+        return isRunning;
     }
 
     /**
@@ -100,12 +103,14 @@ public class WeLoaderResponseImp implements WeLoaderProgressListener,WeLoaderRes
     @Override
     public void progress(long count, long read, boolean isFinish) {
         if (isFinish) {
+            isRunning = false;
             isStart = false;
             //切线程
             runMainThread(WeLoaderConstant.DOWNLOAN_FINISH_INS);
             return;
         }
         if (isStart) {
+            isRunning = true;
             isStart = false;
             runMainThread(WeLoaderConstant.START_INS);
         }

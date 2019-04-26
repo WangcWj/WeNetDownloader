@@ -2,6 +2,7 @@ package demo.wang.cn.download.request;
 
 import java.io.File;
 
+import demo.wang.cn.download.WeLoader;
 import demo.wang.cn.download.lifecircle.WeLoaderLifeCircle;
 import demo.wang.cn.download.utils.FileUtils;
 import okhttp3.Request;
@@ -14,7 +15,6 @@ import okhttp3.Request;
  */
 public class WeLoaderRequestImp implements WeLoaderRequest {
 
-    final String TAG = "WeLoaderRequestImp : ";
     private String url;
     private File mTargetFile;
 
@@ -24,8 +24,9 @@ public class WeLoaderRequestImp implements WeLoaderRequest {
     }
 
     @Override
-    public void setUrl(String url) {
+    public WeLoaderRequest setUrl(String url) {
         this.url = url;
+        return this;
     }
 
     @Override
@@ -43,16 +44,17 @@ public class WeLoaderRequestImp implements WeLoaderRequest {
     }
 
     @Override
-    public WeLoaderRequestImp setFilePath(String mFilePath) {
+    public WeLoaderRequest setFilePath(String mFilePath) {
         File file = FileUtils.handleFile(mFilePath);
         checkFile(file);
         return this;
     }
 
     @Override
-    public void setTargetFile(File mTargetFile) {
+    public WeLoaderRequest setTargetFile(File mTargetFile) {
         FileUtils.handleFile(mTargetFile);
         checkFile(mTargetFile);
+        return this;
     }
 
     private void checkFile(File file) {

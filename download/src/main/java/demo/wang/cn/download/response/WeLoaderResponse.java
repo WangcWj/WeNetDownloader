@@ -55,6 +55,8 @@ public interface WeLoaderResponse extends Callback {
      */
     void saveFile(long startPoint, File mSaveFile, Response response);
 
+    boolean isRunning();
+
     /**
      * 已经创建好
      */

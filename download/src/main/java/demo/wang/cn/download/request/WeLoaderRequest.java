@@ -26,7 +26,7 @@ public interface WeLoaderRequest extends WeLoaderLifeCircle {
      *
      * @param url
      */
-    void setUrl(String url);
+    WeLoaderRequest setUrl(String url);
 
     /**
      * 获取下载到本地的文件
@@ -56,7 +56,6 @@ public interface WeLoaderRequest extends WeLoaderLifeCircle {
      *
      * @param mTargetFile File
      */
-    void setTargetFile(File mTargetFile);
-
+    WeLoaderRequest setTargetFile(File mTargetFile);
 
 }

@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView textView;
     WeLoader build;
+    private String downloadName;
+    private int index = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,64 +35,68 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         textView = findViewById(R.id.progress);
         int i = ContextCompat.checkSelfPermission(this, Manifest.permission_group.STORAGE);
-        if(i < 0){
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission_group.STORAGE},100);
+        if (i < 0) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission_group.STORAGE}, 100);
         }
 
         findViewById(R.id.downloan).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String absolutePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
-                String filePath = absolutePath +"/wang.apk";
-                if(null == build) {
-                    build = new WeLoader.Builder()
-                            .url(downloan)
-                            .file(filePath)
-                            .addListener(baseCallback)
-                            .build();
-                }
-                build.execute();
-
+                index++;
+                setDownloan("/wang" + index);
             }
         });
+    }
+
+    private void setDownloan(String apkName) {
+        String absolutePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+        downloadName = apkName;
+        String filePath = absolutePath + apkName + ".apk";
+        if (null == build) {
+            build = new WeLoader.Builder()
+                    .url(downloan)
+                    .file(filePath)
+                    .addListener(baseCallback)
+                    .build();
+        }
+        build.execute();
     }
 
 
     private BaseCallback baseCallback = new BaseCallback() {
         @Override
         public void downLoanProgress(long read, long count, float percentage) {
-            setTextDesc(read,count);
+            setTextDesc(read, count);
         }
 
         @Override
         public void downLoanStart() {
-            Log.e("WANG","MainActivity.downLoanStart." );
+            Log.e("WANG", "MainActivity.downLoanStart." + downloadName);
         }
 
         @Override
         public void downLoanFail(Exception e) {
-            Log.e("WANG","MainActivity.downLoanFail."+e );
+            Log.e("WANG", "MainActivity.downLoanFail." + downloadName + e);
         }
 
         @Override
         public void downLoanCancel() {
-            Log.e("WANG","MainActivity.downLoanCancel." );
+            Log.e("WANG", "MainActivity.downLoanCancel." + downloadName);
         }
 
         @Override
         public void downLoanFinish() {
-            Log.e("WANG","MainActivity.downLoanFinish." );
+            Log.e("WANG", "MainActivity.downLoanFinish." + downloadName);
         }
     };
 
-    private void setTextDesc(long read,long count){
-        textView.setText("read = "+read +"  count = "+count);
+    private void setTextDesc(long read, long count) {
+
     }
 
     @Override
     protected void onDestroy() {
         build.destroy();
-        Log.e("WANG","MainActivity.onDestroy." );
         super.onDestroy();
     }
 }
