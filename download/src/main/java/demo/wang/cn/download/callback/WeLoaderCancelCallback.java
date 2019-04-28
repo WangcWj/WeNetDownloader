@@ -8,5 +8,5 @@ package demo.wang.cn.download.callback;
  */
 public interface WeLoaderCancelCallback extends WeloaderBaseCallback {
 
-    void downLoanCancel();
+    void downLoanCancel(long point);
 }

@@ -1,7 +1,5 @@
 package demo.wang.cn.download.response;
 
-import android.util.Log;
-
 import java.io.IOException;
 
 import demo.wang.cn.download.callback.WeLoaderProgressListener;

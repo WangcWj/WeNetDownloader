@@ -52,11 +52,16 @@ public class WeLoaderRequestImp implements WeLoaderRequest {
 
     @Override
     public WeLoaderRequest setTargetFile(File mTargetFile) {
-        FileUtils.handleFile(mTargetFile);
-        checkFile(mTargetFile);
+        if(FileUtils.handleFile(mTargetFile)){
+            checkFile(mTargetFile);
+        }
         return this;
     }
 
+    /**
+     * 1.当前保存的File是否能用
+     * @param file
+     */
     private void checkFile(File file) {
         if (null == file) {
             throw new RuntimeException();

@@ -13,7 +13,7 @@ public abstract  class BaseCallback implements WeLoaderCancelCallback,
 
 
     @Override
-    public void downLoanCancel() {
+    public void downLoanCancel(long point) {
 
     }
 

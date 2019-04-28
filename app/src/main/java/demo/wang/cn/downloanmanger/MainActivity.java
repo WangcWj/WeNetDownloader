@@ -1,6 +1,7 @@
 package demo.wang.cn.downloanmanger;
 
 import android.Manifest;
+import android.app.DownloadManager;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -28,31 +29,54 @@ public class MainActivity extends AppCompatActivity {
     WeLoader build;
     private String downloadName;
     private int index = 0;
+    private HashMap<String, String> map = new HashMap();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         textView = findViewById(R.id.progress);
-        int i = ContextCompat.checkSelfPermission(this, Manifest.permission_group.STORAGE);
+        int i = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if (i < 0) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission_group.STORAGE}, 100);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE}, 100);
         }
+        map.put("wang1", "wa");
+        map.put("wang2", "wa");
+        map.put("wang3", "wa");
+        map.put("wang4", "wa");
+        map.put("wang5", "wa");
+        map.put("wang6", "wa");
+        String trim = map.toString().replace("{", "").replace("}", "").replace(" ", "").replace(",", "&").trim();
+        Log.e("WANG", "MainActivity.onCreate." + trim);
 
         findViewById(R.id.downloan).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                index++;
-                setDownloan("/wang" + index);
+                setDownloan("/wang");
             }
         });
+        //暂停
+        findViewById(R.id.downloan2).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                build.stop();
+            }
+        });
+        //继续
+        findViewById(R.id.downloan3).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                build.keepOn();
+            }
+        });
+
     }
 
     private void setDownloan(String apkName) {
         String absolutePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
         downloadName = apkName;
         String filePath = absolutePath + apkName + ".apk";
-        if (null == build) {
+        if(null == build) {
             build = new WeLoader.Builder()
                     .url(downloan)
                     .file(filePath)
@@ -64,34 +88,37 @@ public class MainActivity extends AppCompatActivity {
 
 
     private BaseCallback baseCallback = new BaseCallback() {
+
+        @Override
+        public void downLoanCancel(long point) {
+            Log.e("WANG", "MainActivity.downLoanCancel." +point);
+        }
+
         @Override
         public void downLoanProgress(long read, long count, float percentage) {
             setTextDesc(read, count);
         }
 
         @Override
-        public void downLoanStart() {
-            Log.e("WANG", "MainActivity.downLoanStart." + downloadName);
-        }
-
-        @Override
         public void downLoanFail(Exception e) {
-            Log.e("WANG", "MainActivity.downLoanFail." + downloadName + e);
-        }
-
-        @Override
-        public void downLoanCancel() {
-            Log.e("WANG", "MainActivity.downLoanCancel." + downloadName);
+            Log.e("WANG", "MainActivity.downLoanFail." + e);
         }
 
         @Override
         public void downLoanFinish() {
-            Log.e("WANG", "MainActivity.downLoanFinish." + downloadName);
+            File saveFile = build.getSaveFile();
+            long length = saveFile.length();
+            Log.e("WANG","MainActivity.downLoanFinish."+length );
+        }
+
+        @Override
+        public void downLoanStart() {
+            Log.e("WANG","MainActivity.downLoanStart." );
         }
     };
 
     private void setTextDesc(long read, long count) {
-
+       textView.setText("read  ="+read+"  count  =  "+count);
     }
 
     @Override

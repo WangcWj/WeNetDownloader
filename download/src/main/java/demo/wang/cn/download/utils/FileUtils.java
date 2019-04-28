@@ -13,13 +13,14 @@ import java.io.File;
 public class FileUtils {
 
 
-    public static void handleFile(File file){
+    public static boolean handleFile(File file){
         if(null == file){
-            return;
+            return false;
         }
         if(file.exists()){
             file.delete();
         }
+        return true;
     }
 
     public static File handleFile(String filePath){
@@ -29,6 +30,12 @@ public class FileUtils {
             return file;
         }
         return null;
+    }
+
+    public static void delectedFile(File file){
+        if(file.exists()){
+            file.delete();
+        }
     }
 
 }

@@ -16,27 +16,17 @@
         android:id="@+id/downloan2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="下载2" />
+        android:text="暂停" />
     <Button
         android:id="@+id/downloan3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="下载3" />
+        android:text="继续" />
     <Button
         android:id="@+id/downloan4"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="下载4" />
-    <Button
-        android:id="@+id/downloan5"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="下载5" />
-    <Button
-        android:id="@+id/downloan6"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="下载6" />
+        android:text="重新下载" />
 
     <TextView
         android:textSize="20dp"

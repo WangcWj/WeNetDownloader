@@ -25,7 +25,7 @@ public interface WeLoaderResponse extends Callback {
      * 设置当前下载是否已经开始
      * @param start
      */
-    void setStart(boolean start);
+    void setCancel(boolean start);
 
     /**
      * 设置回掉接口的实现类
@@ -56,6 +56,8 @@ public interface WeLoaderResponse extends Callback {
     void saveFile(long startPoint, File mSaveFile, Response response);
 
     boolean isRunning();
+
+    void reset(boolean isStart);
 
     /**
      * 已经创建好

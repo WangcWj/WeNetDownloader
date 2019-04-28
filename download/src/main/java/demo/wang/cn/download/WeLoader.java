@@ -1,4 +1,7 @@
 package demo.wang.cn.download;
+
+import android.util.Log;
+
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
@@ -41,25 +44,31 @@ public class WeLoader implements WeLoaderLifeCircle, InnerFinishCallBack {
     }
 
     public void execute() {
-        if(mWeLoaderResponse.isRunning()){
+        if (mWeLoaderResponse.isRunning()) {
+            Log.e("WANG", "WeLoader.execute.正在执行!");
             return;
         }
+        mWeLoaderResponse.reset(true);
         request(0);
     }
 
     public void keepOn() {
-        request(mWeLoaderResponse.getBreakPoint());
+        if(mWeLoaderResponse.isRunning()){
+           return;
+        }
+        long breakPoint = mWeLoaderResponse.getBreakPoint();
+        request(breakPoint);
     }
 
     public void stop() {
         cancel();
     }
 
-    public String getUrl(){
+    public String getUrl() {
         return mWeRequest.getUrl();
     }
 
-    public File getSaveFile(){
+    public File getSaveFile() {
         return mWeRequest.getTargetFile();
     }
 
@@ -69,16 +78,17 @@ public class WeLoader implements WeLoaderLifeCircle, InnerFinishCallBack {
 
     private void cancel() {
         if (null != mOkCall && !mOkCall.isCanceled()) {
+            mWeLoaderResponse.setCancel(true);
             mOkCall.cancel();
-            mWeLoaderResponse.notifyCallBack(WeLoaderConstant.CANCEL_INS);
+            mWeLoaderResponse.notifyCallBack(WeLoaderConstant.CANCEL_INS, mWeLoaderResponse.getBreakPoint());
         }
     }
 
     private void request(long startPoint) {
         Request request = mWeRequest.createRequest(startPoint);
         mOkCall = okHttpClient.newCall(request);
-        mWeLoaderResponse.setStart(true);
         mOkCall.enqueue(mWeLoaderResponse);
+        mWeLoaderResponse.runMainThread(WeLoaderConstant.START_INS);
     }
 
     /**
