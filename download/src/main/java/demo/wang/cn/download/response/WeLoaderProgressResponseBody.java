@@ -50,13 +50,20 @@ public class WeLoaderProgressResponseBody extends ResponseBody {
             long currentRead;
 
             @Override
-            public long read(Buffer sink, long byteCount) throws IOException {
-                long read = super.read(sink, byteCount);
-                currentRead += read != -1 ? read : 0;
-                if (null != weLoaderProgressListener) {
-                    weLoaderProgressListener.progress(responseBody.contentLength(), currentRead, read == -1);
+            public long read(Buffer sink, long byteCount) {
+                try {
+                    long read = super.read(sink, byteCount);
+                    currentRead = read != -1 ? read : 0;
+                    if (null != weLoaderProgressListener) {
+                        weLoaderProgressListener.progress(responseBody.contentLength(), currentRead, read == -1);
+                    }
+                    return read;
+                } catch (IOException e) {
+                    if (null != weLoaderProgressListener) {
+                        weLoaderProgressListener.progressException(e);
+                    }
                 }
-                return read;
+                return currentRead;
             }
         };
     }

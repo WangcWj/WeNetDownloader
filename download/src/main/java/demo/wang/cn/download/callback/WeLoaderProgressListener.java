@@ -1,5 +1,7 @@
 package demo.wang.cn.download.callback;
 
+import java.io.IOException;
+
 /**
  * Created to :
  *
@@ -9,5 +11,7 @@ package demo.wang.cn.download.callback;
 public interface WeLoaderProgressListener extends WeloaderBaseCallback{
 
     void progress(long count, long read, boolean isFinish);
+
+    void progressException(IOException e);
 
 }

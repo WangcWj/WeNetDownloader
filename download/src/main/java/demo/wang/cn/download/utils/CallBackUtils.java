@@ -30,7 +30,7 @@ public class CallBackUtils {
         } else if (baseCallback instanceof WeLoaderStartCallback) {
             return WeLoaderConstant.START_INS;
         } else if (baseCallback instanceof WeLoaderFinishCallback) {
-            return WeLoaderConstant.DOWNLOAN_FINISH_INS;
+            return WeLoaderConstant.DOWNLOAD_FINISH_INS;
         } else if (baseCallback instanceof WeLoaderFailCallback) {
             return WeLoaderConstant.FAIL_INS;
         } else if (baseCallback instanceof InnerFinishCallBack) {
@@ -49,7 +49,7 @@ public class CallBackUtils {
             case WeLoaderConstant.START_INS:
                 ((WeLoaderStartCallback) baseCallback).downLoanStart();
                 break;
-            case WeLoaderConstant.DOWNLOAN_FINISH_INS:
+            case WeLoaderConstant.DOWNLOAD_FINISH_INS:
                 ((WeLoaderFinishCallback) baseCallback).downLoanFinish();
                 break;
             case WeLoaderConstant.FAIL_INS:

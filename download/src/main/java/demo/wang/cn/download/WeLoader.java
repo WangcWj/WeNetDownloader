@@ -22,6 +22,9 @@ import okhttp3.Response;
 
 /**
  * Created to :
+ * 1.断点下载.
+ * 2.下载的回调:一个方法怎么接收多个回调函数.
+ * 3.结束之后的内存回收.
  *
  * @author WANG
  * @date 2019/4/15

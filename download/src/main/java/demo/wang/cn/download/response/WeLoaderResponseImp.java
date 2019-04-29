@@ -10,12 +10,14 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.HashMap;
 import java.util.Map;
-
 import demo.wang.cn.download.callback.WeloaderBaseCallback;
 import demo.wang.cn.download.constant.WeLoaderConstant;
 import demo.wang.cn.download.callback.WeLoaderProgressListener;
 import demo.wang.cn.download.utils.CallBackUtils;
 import demo.wang.cn.download.utils.ThreadUtils;
+import io.reactivex.Flowable;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 import okhttp3.Call;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
@@ -28,13 +30,18 @@ import okhttp3.ResponseBody;
  */
 public class WeLoaderResponseImp implements WeLoaderProgressListener, WeLoaderResponse {
 
-    private volatile long mCurrentPoint = 0L;
     private Map<String, WeloaderBaseCallback> callbacks;
-    private boolean isDestroy;
-    private volatile boolean isCancel = true;
-    private long mCountLength = -1L;
-    private long mBreakPoint = 0L;
     private CallBackRunnable callBackRunnable;
+    private Flowable<CallBackRunnable> mFollowable;
+    private CompositeDisposable mCompositeDisposable;
+
+
+    private boolean isDestroy;
+    private long mBreakPoint = 0L;
+    private long mCountPoint = -1L;
+    private boolean isCancel = true;
+
+    private volatile long mCurrentPoint = 0L;
 
     @Override
     public long getBreakPoint() {
@@ -53,13 +60,14 @@ public class WeLoaderResponseImp implements WeLoaderProgressListener, WeLoaderRe
 
     @Override
     public void reset(boolean isStart) {
-        Log.e("WANG", "WeLoaderResponseImp.reset.");
-        if (!isStart) {
-            runMainThread(WeLoaderConstant.DOWNLOAN_FINISH_INS);
+        if (isStart) {
+            mCurrentPoint = 0L;
+            isCancel = false;
+        } else {
+            //下载完毕并且保存文件完毕
+            runMainThread(WeLoaderConstant.DOWNLOAD_FINISH_INS);
+            isCancel = true;
         }
-        mCurrentPoint = 0L;
-        mCountLength = -1L;
-        isCancel = false;
     }
 
     /**
@@ -117,12 +125,20 @@ public class WeLoaderResponseImp implements WeLoaderProgressListener, WeLoaderRe
      */
     @Override
     public void progress(long count, long read, boolean isFinish) {
-        if (mCountLength == -1) {
-            mCountLength = count;
+        if (-1 == mCountPoint) {
+            mCountPoint = count;
         }
-        read += mBreakPoint;
-        mCurrentPoint = read;
-        runMainThread(WeLoaderConstant.PROGRESS_INS, count, read);
+        if (isFinish) {
+            reset(false);
+        }
+        mBreakPoint += read;
+        mCurrentPoint = mBreakPoint;
+        runMainThread(WeLoaderConstant.PROGRESS_INS, mCountPoint, mBreakPoint);
+    }
+
+    @Override
+    public void progressException(IOException e) {
+        runMainThread(WeLoaderConstant.FAIL_INS, e);
     }
 
     /**
@@ -133,9 +149,31 @@ public class WeLoaderResponseImp implements WeLoaderProgressListener, WeLoaderRe
      */
     @Override
     public void runMainThread(String flag, Object... arg) {
+        if (isDestroy) {
+            return;
+        }
+        if (WeLoaderConstant.PROGRESS_INS.equals(flag)) {
+            runProgress(flag, arg);
+        } else {
+            Disposable disposable = ThreadUtils.runThread(false, new Runnable() {
+                @Override
+                public void run() {
+                    notifyAllCallBack(flag, arg);
+                }
+            });
+            mCompositeDisposable.add(disposable);
+        }
+    }
+
+    private void runProgress(String flag, Object... arg) {
+        if (null == callBackRunnable) {
+            callBackRunnable = new CallBackRunnable();
+            mFollowable = Flowable.just(callBackRunnable);
+        }
         callBackRunnable.setFlag(flag);
         callBackRunnable.setArg(arg);
-        ThreadUtils.runThread(false, callBackRunnable);
+        Disposable disposable = ThreadUtils.runThread(mFollowable, false, callBackRunnable);
+        mCompositeDisposable.add(disposable);
     }
 
     /**
@@ -246,7 +284,6 @@ public class WeLoaderResponseImp implements WeLoaderProgressListener, WeLoaderRe
             e.printStackTrace();
         } finally {
             try {
-                mBreakPoint = mCurrentPoint;
                 if (in != null) {
                     in.close();
                 }
@@ -256,9 +293,6 @@ public class WeLoaderResponseImp implements WeLoaderProgressListener, WeLoaderRe
                 if (randomAccessFile != null) {
                     randomAccessFile.close();
                 }
-                if (mCountLength == mCurrentPoint) {
-                    reset(false);
-                }
             } catch (IOException e) {
                 runMainThread(WeLoaderConstant.FAIL_INS, e);
                 e.printStackTrace();
@@ -266,7 +300,7 @@ public class WeLoaderResponseImp implements WeLoaderProgressListener, WeLoaderRe
         }
     }
 
-    class CallBackRunnable implements Runnable {
+    public class CallBackRunnable implements Runnable {
         private String flag;
         private Object[] arg;
 
@@ -287,13 +321,18 @@ public class WeLoaderResponseImp implements WeLoaderProgressListener, WeLoaderRe
     @Override
     public void create() {
         isDestroy = false;
-        callBackRunnable = new CallBackRunnable();
+        mCompositeDisposable = new CompositeDisposable();
     }
 
     @Override
     public void destroy() {
         isDestroy = true;
         callbacks.clear();
+        if (null != mCompositeDisposable && !mCompositeDisposable.isDisposed()) {
+            mCompositeDisposable.dispose();
+        }
+        mFollowable = null;
+        mCompositeDisposable = null;
         callBackRunnable = null;
     }
 
