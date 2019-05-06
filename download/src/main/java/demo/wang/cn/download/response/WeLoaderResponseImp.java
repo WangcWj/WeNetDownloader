@@ -165,6 +165,11 @@ public class WeLoaderResponseImp implements WeLoaderProgressListener, WeLoaderRe
         }
     }
 
+    /**
+     * 方法调用比较频繁
+     * @param flag
+     * @param arg
+     */
     private void runProgress(String flag, Object... arg) {
         if (null == callBackRunnable) {
             callBackRunnable = new CallBackRunnable();
