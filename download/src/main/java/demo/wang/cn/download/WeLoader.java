@@ -43,18 +43,23 @@ public class WeLoader implements WeLoaderLifeCircle, InnerFinishCallBack {
         mWeRequest = builder.weRequest;
         mWeLoaderResponse = builder.weLoaderResponse;
         mWeLoaderResponse.setBaseCallback(this);
-        create();
     }
 
+    /**
+     * 执行下载任务，一次只能下载一个任务。
+     * 目前还没开发并行问题。
+     */
     public void execute() {
         if (mWeLoaderResponse.isRunning()) {
-            Log.e("WANG", "WeLoader.execute.正在执行!");
             return;
         }
         mWeLoaderResponse.reset(true);
         request(0);
     }
 
+    /**
+     * 下载中停止之后，该方法继续下载。
+     */
     public void keepOn() {
         if(mWeLoaderResponse.isRunning()){
            return;
@@ -163,7 +168,9 @@ public class WeLoader implements WeLoaderLifeCircle, InnerFinishCallBack {
 
         public WeLoader build() {
             okHttpClient = builder.build();
-            return new WeLoader(this);
+            WeLoader weLoader = new WeLoader(this);
+            weLoader.create();
+            return weLoader;
         }
     }
 }
